@@ -150,6 +150,7 @@
 </template>
 
 <script>
+
 import TableInsert from "@/components/TableInsert.vue";
 export default {
   name: 'HeaderPage',

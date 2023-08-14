@@ -2,28 +2,13 @@
   <div>
     <table class="item_class_0 class_5 mt-5" id="myTable">
       <thead>
-      <tr>
-        <th scope="col">
-          English title
-          <br />
-        </th>
-        <th scope="col">
-          English text
-        </th>
-        <th scope="col">
-          Armenia title
-        </th>
-        <th>
-          Armenia text
-        </th>
-        <th scope="col">
-          Image
-          <br />
-        </th>
-        <!--<th scope="col">
-            #
-        </th>-->
-      </tr>
+
+        <th scope="col">English title<br /></th>
+        <th scope="col">English text</th>
+        <th scope="col">Armenia title</th>
+        <th>Armenia text</th>
+        <th scope="col">Image<br /></th>
+
       </thead>
       <tbody class="js-rows" id="sortable">
       <tr
@@ -32,24 +17,12 @@
           class="item_class_1 class_10 post_div"
           style="cursor: pointer;"
       >
+        <td>{{ post.textArm }}</td>
+        <td>{{ post.titleEng }}</td>
+        <td>{{ post.textEng }}</td>
+        <td>{{ post.titleArm }}</td>
         <td>
-          {{ post.textArm  }}
-        </td>
-        <td>
-          {{ post.titleEng }}
-        </td>
-        <td>
-          {{ post.textEng }}
-        </td>
-        <td>
-          {{ post.titleArm  }}
-        </td>
-        <td>
-          <img
-              :src="post.image"
-              alt="img"
-              class="img_style"
-          />
+          <img :src="post.image" alt="img" class="img_style" />
         </td>
       </tr>
       </tbody>
@@ -58,31 +31,38 @@
 </template>
 
 <script>
+import Sortable from 'sortablejs';
 export default {
-  name: 'TableInsert',
-  data() {
-    return {
-      data: {
-        return: {
-          data: []
-        }
-      },
-
-    };
-  },
+    name: 'TableInsert',
+    data() {
+      return {
+        data: [],
+      };
+    },
   mounted() {
     this.getPost()
+    this.initSortable();
   },
   methods: {
+    initSortable() {
+      const options = {
+        animation: 150,
+        onUpdate: (event) => {
+          const movedItem = this.data.splice(event.oldIndex, 1)[0];
+          this.data.splice(event.newIndex, 0, movedItem);
+        },
+      };
+      new Sortable(document.getElementById('sortable'), options);
+    },
     getPost(){
       fetch('http://localhost:8000/admin/getPost', {
         method: 'GET',
-       // / headers: {
-          /*  'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
-            'Content-Type': 'multipart/form-data',*/
-          /*'Content-Type': 'application/json',*/
+        // / headers: {
+        /*  'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
+          'Content-Type': 'multipart/form-data',*/
+        /*'Content-Type': 'application/json',*/
         // /  'Authorization': `Bearer ${this.token}`,
-       // / },
+        // / },
       })
           .then(response => response.json())
           .then(data => {
