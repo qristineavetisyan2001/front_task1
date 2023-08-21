@@ -123,7 +123,6 @@
              <input v-model="titleArm" class = "mt-3 w-100" type = "text"  placeholder = "armenian title" />
            </div>
            <div class = "col-lg-4 my-3">
-<!--             <input type = "file" name = "image"/>-->
              <input type="file" name="image" @change="onImageChange">
            </div>
 
@@ -152,6 +151,7 @@
 <script>
 
 import TableInsert from "@/components/TableInsert.vue";
+/*import {response} from "express";*/
 export default {
   name: 'HeaderPage',
   components: {
@@ -192,25 +192,24 @@ export default {
           'Authorization': `Bearer ${this.token}`,
         },
         config,
-        credentials: 'include',
+        /*credentials: 'include',*/
         redirect: 'follow',
         referrerPolicy: 'no-referrer',
         body: formData
       })
           .then(response => response.json())
-          .then(data => {
-            console.log(data);
+          .then( () => {
             this.titleEng ='';
             this.titleArm ='';
             this.textEng ='';
             this.textArm ='';
             this.image = null;
+            this.getPost();
           })
           .catch(error => {
             console.error(error);
           });
 
-      window.location.reload();
     },
 
     handleSearch() {
@@ -218,7 +217,21 @@ export default {
     },
     hideAsideBar(){
       this.show = !this.show
-    }
+    },
+
+    getPost(){
+
+      fetch('http://localhost:8000/admin/getPost', {
+        method: 'GET',
+      })
+          .then(response => response.json())
+          .then(data => {
+            this.data = data
+          })
+          .catch(error => {
+            console.error(error);
+          });
+    },
   },
 
 };

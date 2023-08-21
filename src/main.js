@@ -20,7 +20,7 @@ Vue.use(IconsPlugin)
 Vue.use(VueRouter);
 
 Vue.use(VueAxios, axios)
-axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
+/*axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';*/
 
 const routes = [
   { path: '/', component: HelloWorld, name: "HelloWorld"},
@@ -39,3 +39,5 @@ new Vue({
 }).$mount('#app')
 
 export default router;
+
+

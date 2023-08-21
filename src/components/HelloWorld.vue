@@ -53,7 +53,6 @@ export default {
   methods: {
 
     login() {
-
         if (this.form.name && this.form.pass) {
           var self = this;
 
