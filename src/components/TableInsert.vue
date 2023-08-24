@@ -11,8 +11,10 @@
         <th scope="col">edit<br /></th>
       </thead>
       <tbody class="js-rows" id="sortable">
+      <template v-if="posts.length">
+
       <tr
-          v-for="post in data"
+          v-for="post in posts"
           :key="post.id"
           class="item_class_1 class_10 post_div"
           style="cursor: pointer;"
@@ -36,16 +38,17 @@
 
         </td>
       </tr>
+      </template>
       </tbody>
     </table>
     <b-modal id="bv-modal-example" hide-footer v-model="isModalVisible">
       <div class="d-block text-center">
         <h3>do you want to delete? {{postt}} </h3>
       </div>
-      <b-button class="mt-3" block @click="confirmDelete(postt)">delete</b-button>
+      <b-button  class="mt-3" block @click="()=>{confirmDelete(postt); isModalVisible=!isModalVisible}">delete</b-button>
     </b-modal>
     <b-modal id="modal-1" title="Edit Post" >
-      <form method="post" enctype="multipart/form-data" @submit.prevent="handleSubmit">
+      <form method="post" enctype="multipart/form-data" @submit.prevent="submitForm">
         <label for="editedPostTitleEn">English title</label>
         <input v-model="postData.titleEng" id="editedPostTitleEn" type="text" class="form-control">
         <label for="editedPostContentEn">English text</label>
@@ -56,62 +59,45 @@
         <textarea v-model="postData.textArm" id="editedPostContentArm" class="form-control"></textarea>
         <img :src="postData.image" alt="img" class="img_style form-control mt-3"  />
         <img v-if="image" :src="image" alt="img" class="img_style form-control mt-3"  />
-        <input type="file"  @change="onImageChange">
+        <input type="file"  @change="onImage">
 
-        <b-button class="mt-3" block type="submit" @click.prevent="changePost(postt)">Save</b-button>
+        <b-button  class="mt-3" block type="submit" >Save</b-button>
       </form>
     </b-modal>
 
-
+<!--@click.prevent="changePost(postt)"-->
   </div>
 </template>
 
 <script>
-
-import Sortable from 'sortablejs';
 export default {
     name: 'TableInsert',
+    props:[ 'posts', 'confirmDelete', 'changePost'],
     data() {
       return {
-        isModalVisible: false,
         isModal: false,
         post:{
           id:null,
         },
-        data: [],
         selectedPostId: null,
         postt:null,
         postData: {},
         image:null,
+        isModalVisible: false,
         token: localStorage.getItem('token'),
       };
     },
 
   mounted() {
-    this.getPost()
-    this.initSortable();
-    console.log(this.token)
+    console.log(this.posts)
   },
   methods: {
-     confirmDelete(postId) {
-        console.log(postId)
-        fetch('http://localhost:8000/admin/deletePost', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body:  postId ,
-        })
-            .then(response => response.json())
-            .then(data => {
-              console.log('Post deleted:', data);
-              this.isModalVisible = false;
-            this. getPost();
-            })
-            .catch(error => {
-              console.error('Error deleting post:', error);
-            });
-      },
+    submitForm() {
+      //this.postData.image=this.image;
+     /* console.log(this.postData.image);*/
+      this.$emit('form-submitted', this.postData);
+      this.postData = {}; // Clear the form input after submission
+    },
     getOnePost(postId) {
       fetch('http://localhost:8000/admin/get', {
         method: 'POST',
@@ -123,113 +109,22 @@ export default {
           .then(response => response.json())
           .then(data => {
             this.postData = data
-            console.log(data)
           })
           .catch(error => {
             console.error('Error deleting post:', error);
           });
     },
-    initSortable() {
-      const options = {
-        animation: 150,
-        onUpdate: (event) => {
-          const movedItem = this.data.splice(event.oldIndex, 1)[0];
-          this.data.splice(event.newIndex, 0, movedItem);
-        },
-      };
-      new Sortable(document.getElementById('sortable'), options);
-    },
+
     onImageChange(e) {
       this.image = e.target.files[0];
     },
-    changePost(postId) {
-      let config = {
-        headers : {
-          'Content-Type' : 'multipart/form-data'
-        }
-      }
-      let formData = new FormData();
-      formData.append('image', this.image);
-      formData.append('titleEng', this.postData.titleEng);
-      formData.append('titleArm', this.postData.titleArm);
-      formData.append('textEng', this.postData.textEng);
-      formData.append('textArm', this.postData.textArm);
-      formData.append('postid',postId);
-      fetch('http://localhost:8000/admin/saveChanges', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.token}`,
-        },
-        config,
-        credentials: 'include',
-        redirect: 'follow',
-        referrerPolicy: 'no-referrer',
-        body: formData
-      })
-          .then(response => response.json())
-          .then(data => {
-            console.log(data);
-            this.titleEng ='';
-            this.titleArm ='';
-            this.textEng ='';
-            this.textArm ='';
-            this.image = null;
-          })
-          .catch(error => {
-            console.error(error);
-          });
-
+    onImage(e) {
+      this.postData.image = e.target.files[0];
+      //console.log(this.postData.image);
+     // const aa =  this.postData.image;
     },
-    /*changePost(postId) {
-      let config = {
-        headers : {
-          'Content-Type' : 'multipart/form-data',
-        }
-      }
-      let formData = new FormData();
-      formData.append('image', this.image);
-      formData.append('titleEng', this.postData.titleEng);
-      formData.append('titleArm', this.postData.titleArm);
-      formData.append('textEng', this.postData.textEng);
-      formData.append('textArm', this.postData.textArm);
-      formData.append('postid',postId);
-      fetch('http://localhost:8000/admin/saveChanges', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.token}`,
-          'Origin': 'http://localhost:8080',
+  },
 
-        },
-        config,
-        redirect: 'follow',
-        referrerPolicy: 'no-referrer',
-        body: formData,
-      })
-          .then(response => response.json())
-          .then(data => {
-            console.log(data);
-          })
-          .catch(error => {
-            console.error(error);
-          });
-
-    },*/
-    getPost(){
-      fetch('http://localhost:8000/admin/getPost', {
-        method: 'GET',
-      })
-          .then(response => response.json())
-          .then(data => {
-            this.data = data
-          })
-          .catch(error => {
-            console.error(error);
-          });
-    },
-    handleSubmit() {
-      this.$refs.modal.hide(); // Close the modal after submitting
-    },
-  }
 };
 </script>
 

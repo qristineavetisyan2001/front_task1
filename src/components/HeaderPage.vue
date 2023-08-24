@@ -1,6 +1,5 @@
 <template>
  <div>
-
   <nav class="admin-navbar">
     <div class="admin-navbar-logo" style="margin-left:48px">Admin Dashboard</div>
     <ul class="admin-navbar-menu">
@@ -136,13 +135,13 @@
            </div>
          </div>
          <div class = "mt-3">
-           <button class = "w-50 border border-light p-2" style="background-color: #7B89EC; margin-right: 537px;" @click.prevent="formSubmit()"> Add</button>
+           <button class = "w-50 border border-light p-2" style="background-color: #7B89EC; margin-right: 537px;" @click.prevent="formSubmit"> Add</button>
          </div>
        </form>
        <div>
 <!--         <?= get_session('error'); ?>-->
        </div>
-       <table-insert></table-insert>
+       <table-insert :confirmDelete="confirmDelete"  @form-submitted="handleFormSubmission" :posts="posts"></table-insert>
      </div>
    </div>
  </div>
@@ -159,6 +158,8 @@ export default {
   },
   data() {
     return {
+      posts:[],
+      postData:{},
       titleEng:'',
       titleArm:'',
       textEng:'',
@@ -169,10 +170,58 @@ export default {
       token: localStorage.getItem('token'),
     };
   },
-
+  mounted() {
+    this.getPost()
+  },
   methods: {
+    handleFormSubmission(postData) {
+      this.postData = postData;
+      /*console.log(this.postData);*/
+     /* const parts = this.postData.image.split("/");
+      this.postData.image = parts[parts.length - 1];*/
+      let config = {
+        headers : {
+          'Content-Type' : 'multipart/form-data'
+        }
+      }
+      let formData = new FormData();
+      formData.append('image', this.postData.image);
+      formData.append('titleEng', this.postData.titleEng);
+      formData.append('titleArm', this.postData.titleArm);
+      formData.append('textEng', this.postData.textEng);
+      formData.append('textArm', this.postData.textArm);
+      formData.append('id',this.postData.id);
+      fetch('http://localhost:8000/admin/saveChanges', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.token}`,
+        },
+        config,
+        redirect: 'follow',
+        referrerPolicy: 'no-referrer',
+        body: formData
+      })
+          .then(response => response.json())
+          .then(data => {
+            console.log(data);
+            this.titleEng ='';
+            this.titleArm ='';
+            this.textEng ='';
+            this.textArm ='';
+            this.image = null;
+            this.getPost();
+          })
+          .catch(error => {
+            console.error(error);
+          });
+    },
     onImageChange(e) {
       this.image = e.target.files[0];
+    },
+
+    onImage(e) {
+      this.postData.image = e.target.files[0];
+     /* console.log(this.postData.image);*/
     },
     formSubmit() {
       let config = {
@@ -204,12 +253,24 @@ export default {
             this.textEng ='';
             this.textArm ='';
             this.image = null;
-            this.getPost();
+            this.getPost()
           })
           .catch(error => {
             console.error(error);
           });
+    },
 
+    getPost(){
+      fetch('http://localhost:8000/admin/getPost', {
+        method: 'GET',
+      })
+          .then(response => response.json())
+          .then(data => {
+            this.posts = data
+          })
+          .catch(error => {
+            console.error(error);
+          });
     },
 
     handleSearch() {
@@ -219,17 +280,22 @@ export default {
       this.show = !this.show
     },
 
-    getPost(){
-
-      fetch('http://localhost:8000/admin/getPost', {
-        method: 'GET',
+    confirmDelete(postId) {
+      fetch('http://localhost:8000/admin/deletePost', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body:  postId ,
       })
           .then(response => response.json())
           .then(data => {
-            this.data = data
+            console.log('Post deleted:', data);
+            this.isModalVisible = false;
+            this.getPost();
           })
           .catch(error => {
-            console.error(error);
+            console.error('Error deleting post:', error);
           });
     },
   },

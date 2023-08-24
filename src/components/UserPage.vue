@@ -9,7 +9,7 @@
       ><div class = "flex center p-3 nk" id = "abs2_content">
         <div class="bg tooltip ">
             <img :src="post.image" class="bg" alt="Slide" />
-            <span class="tooltiptext">{{ post.titleArm  }}</span>
+            <span class="tooltiptext">{{ post.titleEng  }}</span>
         </div>
       </div>
       </div>
