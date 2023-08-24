@@ -114,7 +114,7 @@ export default {
             console.error('Error deleting post:', error);
           });
     },
-
+//////////aaaaaaaaaaaaaaaaaaaaaa
     onImageChange(e) {
       this.image = e.target.files[0];
     },
