@@ -114,16 +114,13 @@ export default {
             console.error('Error deleting post:', error);
           });
     },
-//ccccc
+
     onImageChange(e) {
       this.image = e.target.files[0];
     },
     onImage(e) {
       this.postData.image = e.target.files[0];
       //console.log(this.postData.image);
-     // const aa =  this.postData.image;
-
-      //dfgvszdfb
     },
   },
 
