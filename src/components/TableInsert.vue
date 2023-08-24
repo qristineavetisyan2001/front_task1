@@ -122,6 +122,8 @@ export default {
       this.postData.image = e.target.files[0];
       //console.log(this.postData.image);
      // const aa =  this.postData.image;
+
+      //dfgvszdfb
     },
   },
 
